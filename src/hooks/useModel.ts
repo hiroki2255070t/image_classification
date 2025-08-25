@@ -1,9 +1,12 @@
-// src/hooks/useModel.ts
 import { useState, useEffect } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import { GraphModel } from '@tensorflow/tfjs';
 
-// useModelフックの定義
+/**
+ * 
+ * @param modelPath : '/model/<MODEL_NAME>/model.json'
+ * @returns 
+ */
 export const useModel = (modelPath: string) => {
   // モデル、ローディング状態、ステータスメッセージを管理
   const [model, setModel] = useState<GraphModel | null>(null);
