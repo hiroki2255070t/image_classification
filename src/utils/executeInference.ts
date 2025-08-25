@@ -1,4 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
+import { processOutput } from './processOutput';
 
 const SPLIT_LAYER_NAME = 'PartitionedCall/model_21/tf.math.multiply_61/Mul'; // model.jsonから適切な分割点を取得
 
@@ -46,6 +47,20 @@ export const executeInference = async ({
     },
     model.outputs![0].name
   ) as tf.Tensor;
+
+  const predictions2 = model.execute(
+    {
+      images: inputTensor, // 入力を渡す
+      [SPLIT_LAYER_NAME]: middleTensor, // 処理した中間テンソルを渡す
+    },
+    model.outputs![0].name
+  ) as tf.Tensor;
+
+  const o1 = await processOutput(predictions, 1, 0.75);
+  const o2 = await processOutput(predictions2, 1, 0.75);
+
+  console.log({o1})
+  console.log({o2})
 
   tf.dispose([
     inputTensor,
