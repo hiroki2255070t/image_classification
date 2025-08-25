@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
 import { processOutput } from './processOutput';
+import { executeInference } from './executeInference';
 import { drawBoundingBoxes } from './draw';
 import { COCO_CLASSES } from '../data/coco_classes';
 
@@ -15,26 +16,25 @@ export const runDetectionLoop = async (
 
   const [inputHeight, inputWidth] = model.inputs![0].shape!.slice(1, 3) as number[];
 
-  const predictions = tf.tidy(() => {
-    const frame = tf.browser.fromPixels(video);
-    const resized = tf.image.resizeBilinear(frame, [inputHeight, inputWidth]);
-    const inputTensor = resized.div(255).expandDims(0);
+  // 1. フレームから入力テンソルを作成
+  const frame = tf.browser.fromPixels(video);
+  const resized = tf.image.resizeBilinear(frame, [inputHeight, inputWidth]);
+  const inputTensor = resized.div(255).expandDims(0);
 
-    const output = model.execute(inputTensor) as tf.Tensor;
+  const predictions = await executeInference({ model, inputTensor });
 
-    // inputTensorはdispose済み、outputは返す
-    return output;
-  });
-
-  // processOutputは非同期処理なので tidy 外で実行
+  // 5. 後処理と描画
   const [boxes, scores, classes] = await processOutput(
     predictions,
     video.videoWidth / inputWidth,
     video.videoHeight / inputHeight
   );
-
   drawBoundingBoxes(ctx, boxes, scores, classes, COCO_CLASSES);
 
-  // predictionsは使用後にdispose
-  tf.dispose(predictions);
+  // 6. 不要になったテンソルを全て破棄
+  tf.dispose([
+    frame,
+    resized,
+    predictions,
+  ]);
 };

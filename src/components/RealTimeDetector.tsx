@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { useModel } from '../hooks/useModel';
 import { useWebcam } from '../hooks/useWebcam';
-import { runDetectionLoop } from '../utils/runInference';
+import { runDetectionLoop } from '../utils/runDetectionLoop';
 
 const RealTimeDetector: React.FC = () => {
   const {
