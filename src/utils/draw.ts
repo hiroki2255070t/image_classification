@@ -1,30 +1,31 @@
-import type { DetectedObject } from '@tensorflow-models/coco-ssd';
+export const drawBoundingBoxes = (
+  ctx: CanvasRenderingContext2D,
+  boxes: number[][],
+  scores: number[],
+  classes: number[],
+  labels: string[]
+) => {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-/**
- * 検出結果を描画する
- * @param detections 検出されたオブジェクトの配列
- * @param ctx 描画対象のCanvasRenderingContext2D
- */
-export const drawDetection = (
-  detections: DetectedObject[],
-  ctx: CanvasRenderingContext2D
-): void => {
-  detections.forEach((prediction) => {
-    const [x, y, width, height] = prediction.bbox;
-    const text = `${prediction.class} (${Math.round(prediction.score * 100)}%)`;
+  ctx.strokeStyle = '#16a34a';
+  ctx.lineWidth = 3;
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = '#16a34a';
 
-    // スタイルの設定
-    ctx.strokeStyle = '#00FFFF'; // バウンディングボックスの色 (シアン)
-    ctx.lineWidth = 2;
-    ctx.fillStyle = '#00FFFF';
-    ctx.font = '16px Arial';
+  for (let i = 0; i < scores.length; i++) {
+    const [x, y, width, height] = boxes[i];
+    const label = `${labels[classes[i]]}: ${scores[i].toFixed(2)}`;
+    const mirroredX = ctx.canvas.width - x - width;
 
-    // バウンディングボックスの描画
-    ctx.beginPath();
-    ctx.rect(x, y, width, height);
-    ctx.stroke();
+    ctx.strokeRect(mirroredX, y, width, height);
 
-    // ラベルの描画
-    ctx.fillText(text, x, y > 10 ? y - 5 : 10);
-  });
+    const textWidth = ctx.measureText(label).width;
+    const textHeight = parseInt(ctx.font, 10);
+    const labelY = y > textHeight ? y : textHeight + 4;
+
+    ctx.fillRect(mirroredX, labelY - textHeight, textWidth + 4, textHeight + 4);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(label, mirroredX + 2, labelY);
+    ctx.fillStyle = '#16a34a';
+  }
 };
