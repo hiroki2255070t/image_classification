@@ -32,9 +32,5 @@ export const runDetectionLoop = async (
   drawBoundingBoxes(ctx, boxes, scores, classes, COCO_CLASSES);
 
   // 6. 不要になったテンソルを全て破棄
-  tf.dispose([
-    frame,
-    resized,
-    predictions,
-  ]);
+  tf.dispose([frame, resized, predictions]);
 };
